@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "advent-of-code-2024"
+version = "0.1.0"
+description = ""
+authors = ["pi314ever <pilotflyer824@gmail.com>"]
+readme = "README.md"
+packages = [{include = "advent_of_code_2024"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.26.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
