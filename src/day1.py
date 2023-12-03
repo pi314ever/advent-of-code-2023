@@ -3,8 +3,8 @@ from utils import get_data_path
 
 def main():
     filename = get_data_path("day1.txt")
-    part_1(filename)
-    part_2(filename)
+    assert part_1(filename) == 55172
+    assert part_2(filename) == 54925
 
 
 def part_1(filename):
@@ -14,6 +14,7 @@ def part_1(filename):
             digits = parse_digits(line)
             sum += 10 * digits[0] + digits[-1]
     print("The total sum is: ", sum)
+    return sum
 
 
 def part_2(filename):
@@ -23,6 +24,7 @@ def part_2(filename):
             digits = parse_alpha_digits(line)
             sum += 10 * digits[0] + digits[-1]
     print("The total sum is: ", sum)
+    return sum
 
 
 def parse_digits(line: str):

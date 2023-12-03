@@ -4,8 +4,8 @@ from utils import get_data_lines
 
 def main():
     data = get_data_lines("day2.txt")
-    part_1(data)
-    part_2(data)
+    assert part_1(data) == 2563
+    assert part_2(data) == 70768
 
 
 def part_1(data):
@@ -17,6 +17,7 @@ def part_1(data):
         if game.is_valid():
             sum += game.id
     print("The total sum is: ", sum)
+    return sum
 
 
 def part_2(data):
@@ -27,6 +28,7 @@ def part_2(data):
         min_bag = game.min_bag()
         sum += min_bag.red * min_bag.green * min_bag.blue
     print("The total sum is: ", sum)
+    return sum
 
 
 @dataclass
