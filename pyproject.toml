@@ -9,6 +9,7 @@ packages = [{ include = "advent_of_code_2023" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 numpy = "^1.26.2"
+advent-of-code-data = "^2.0.1"
 
 
 [build-system]
