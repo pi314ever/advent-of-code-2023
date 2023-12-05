@@ -17,7 +17,6 @@ Author: Daniel Huang
   - [Day 3: Gear Ratios](#day-3-gear-ratios)
     - [Part 1](#part-1-2)
     - [Part 2](#part-2-2)
-    - [Grid Data Structure](#grid-data-structure)
   - [Day 4: Scratchcards](#day-4-scratchcards)
     - [Part 1](#part-1-3)
     - [Part 2](#part-2-3)
@@ -33,7 +32,7 @@ Author: Daniel Huang
 ## Day 1: Trebuchet
 
 ### Part 1
-<details>
+<details open>
 <summary><b>Problem Statement</b></summary>
 
 Something is wrong with global snow production, and you've been selected to take a look. The Elves have even given you a map; on it, they've used stars to mark the top fifty locations that are likely to be having problems.
@@ -49,6 +48,7 @@ As they're making the final adjustments, they discover that their calibration do
 The newly-improved calibration document consists of lines of text; each line originally contained a specific calibration value that the Elves now need to recover. On each line, the calibration value can be found by combining the first digit and the last digit (in that order) to form a single two-digit number.
 
 For example:
+
 ```
 1abc2
 pqr3stu8vwx
@@ -58,15 +58,16 @@ treb7uchet
 
 In this example, the calibration values of these four lines are 12, 38, 15, and 77. Adding these together produces 142.
 
-Consider your entire calibration document. What is the sum of all of the calibration values?
+Consider your entire calibration document. **What is the sum of all of the calibration values?**
 </details>
 
-**Approach**
-This task is relatively simple. For each line, extract all the digits into a list `nums: list[int]` and query the number as `10 * nums[0] + nums[-1]`.
-
+<details>
+<summary><b>Solution</b></summary>
+Since each line is independent of all other lines, a simple loop across all lines is sufficient to solve the problem. For each line, extract all the digits into a list <code>nums: list[int]</code> and query the number as <code>10 * nums[0] + nums[-1]</code>.
+</details>
 
 ### Part 2
-<details>
+<details open>
 <summary><b>Problem Statement</b></summary>
 Your calculation isn't quite right. It looks like some of the digits are actually spelled out with letters: one, two, three, four, five, six, seven, eight, and nine also count as valid "digits".
 
@@ -86,13 +87,15 @@ In this example, the calibration values are 29, 83, 13, 24, 42, 14, and 76. Addi
 What is the sum of all of the calibration values?
 </details>
 
-**Approach**
-Similar approach as part 1, but need to iterate through each index to match each word since numbers may overlap some letters.
+<details>
+<summary><b>Solution</b></summary>
+Using a similar iteration approach, the algorithm needs to also check for matching words in the future letters. This is then used to build the list of numbers, which is then used to generate the number as before.
+</details>
 
 ## Day 2: Cube Conundrum
 
 ### Part 1
-<details>
+<details open>
 <summary><b>Problem Statement</b></summary>
 You're launched high into the atmosphere! The apex of your trajectory just barely reaches the surface of a large island floating in the sky. You gently land in a fluffy pile of leaves. It's quite cold, but you don't see much snow. An Elf runs over to greet you.
 
@@ -123,21 +126,23 @@ In the example above, games 1, 2, and 5 would have been possible if the bag had 
 Determine which games would have been possible if the bag had been loaded with only 12 red cubes, 13 green cubes, and 14 blue cubes. What is the sum of the IDs of those games?
 </details>
 
-**Approach**
+<details>
+<summary><b>Solution</b></summary>
+
 This problem is mostly a parsing problem from the text data. This data can be split into hierarchies of functions:
 
 - Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
-  - Action: Split by `:`
+  - Action: Split by <code>:</code>
   - Game 1
-    - Action: Split by ` `
+    - Action: Split by <code> </code>
     - Game
     - 1 (Use this as ID)
   - 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
-    - Action: Split by `;`
+    - Action: Split by <code>;</code>
     - 3 blue, 4 red
-      - Action: Split by `,`
+      - Action: Split by <code>,</code>
       - 3 blue
-        - Action: Split by ` `
+        - Action: Split by <code> </code>
         - 3 (Use as count)
         - blue (Use as label)
       - 4 red
@@ -145,10 +150,11 @@ This problem is mostly a parsing problem from the text data. This data can be sp
     - 2 green
 
 After this, an easy comparison between the bag and hand for each grab can be done to determine if the game is valid.
+</details>
 
 ### Part 2
 
-<details>
+<details open>
 <summary><b>Problem Statement</b></summary>
 The Elf says they've stopped producing snow because they aren't getting any water! He isn't sure why the water stopped; however, he can show you how to get to the water source to check it out for yourself. It's just up ahead!
 
@@ -175,19 +181,22 @@ The power of a set of cubes is equal to the numbers of red, green, and blue cube
 For each game, find the minimum set of cubes that must have been present. What is the sum of the power of these sets?
 </details>
 
-**Approach**
+<details>
+<summary><b>Solution</b></summary>
 From the previous approach and built data-structure, it is simple to grab the maximum number of dies per color per game, then perform the "sum of power" calculations.
+</details>
 
 ## Day 3: Gear Ratios
 
 ### Part 1
-<details>
+<details open>
 <summary><b>Problem Statement</b></summary>
+
 You and the Elf eventually reach a gondola lift station; he says the gondola lift will take you up to the water source, but this is as far as he can bring you. You go inside.
 
 It doesn't take long to find the gondolas, but there seems to be a problem: they're not moving.
 
-"Aaah!"
+*"Aaah!"*
 
 You turn around to see a slightly-greasy Elf with a wrench and a look of surprise. "Sorry, I wasn't expecting anyone! The gondola lift isn't working right now; it'll still be a while before I can fix it." You offer to help.
 
@@ -212,14 +221,16 @@ Here is an example engine schematic:
 
 In this schematic, two numbers are not part numbers because they are not adjacent to a symbol: 114 (top right) and 58 (middle right). Every other number is adjacent to a symbol and so is a part number; their sum is 4361.
 
-Of course, the actual engine schematic is much larger. What is the sum of all of the part numbers in the engine schematic?
+Of course, the actual engine schematic is much larger. **What is the sum of all of the part numbers in the engine schematic?**
 </details>
 
-**Approach**
-For each number, create a "Neighbor space" that includes each all adjacent neighbors.
+<details>
+<summary><b>Solution</b></summary>
+Using a grid data structure, iterate through each line and check for each number. Then, grab the neighbors to check for symbols. If there is any, then add to the total.
+</details>
 
 ### Part 2
-<details>
+<details open>
 <summary><b>Problem Statement</b></summary>
 The engineer finds the missing part and installs it in the engine! As the engine springs to life, you jump in the closest gondola, finally ready to ascend to the water source.
 
@@ -233,6 +244,7 @@ This time, you need to find the gear ratio of every gear and add them all up so 
 
 Consider the same engine schematic again:
 
+```
 467..114..
 ...*......
 ..35..633.
@@ -243,23 +255,27 @@ Consider the same engine schematic again:
 ......755.
 ...$.*....
 .664.598..
+```
 
 In this schematic, there are two gears. The first is in the top left; it has part numbers 467 and 35, so its gear ratio is 16345. The second gear is in the lower right; its gear ratio is 451490. (The * adjacent to 617 is not a gear because it is only adjacent to one part number.) Adding up all of the gear ratios produces 467835.
 
 What is the sum of all of the gear ratios in your engine schematic?
 </details>
 
-**Approach**
-Search instead for `*` and check for neighboring numbers. If there are exactly two, then multiply them together and add to the total.
+<details>
+<summary><b>Solution</b></summary>
 
-### Grid Data Structure
+Search instead for <code>*</code> and check for neighboring numbers. If there are exactly two, then multiply them together and add to the total.
 
-Grid data structure makes these calculations simple by parsing adjacency lists between each unique number and symbol. This grid is parsed once for the problem, and both parts can then be solved. It maintains an adjacency list of all numbers with ID `(x, y, value)` and symbols with ID `(x, y, symbol)` to each other.
+**Grid Data Structure**
+
+Grid data structure makes these calculations simple by parsing adjacency lists between each unique number and symbol. This grid is parsed once for the problem, and both parts can then be solved. It maintains an adjacency list of all numbers with ID <code>(x, y, value)</code> and symbols with ID <code>(x, y, symbol)</code> to each other.
+</details>
 
 ## Day 4: Scratchcards
 
 ### Part 1
-<details>
+<details open>
 <summary><b>Problem Statement</b></summary>
 The gondola takes you up. Strangely, though, the ground doesn't seem to be coming with you; you're not climbing a mountain. As the circle of Snow Island recedes below you, an entire new landmass suddenly appears above you! The gondola carries you to the surface of the new island and lurches into the station.
 
@@ -288,23 +304,25 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
 
 In the above example, card 1 has five winning numbers (41, 48, 83, 86, and 17) and eight numbers you have (83, 86, 6, 31, 17, 9, 48, and 53). Of the numbers you have, four of them (48, 83, 17, and 86) are winning numbers! That means card 1 is worth 8 points (1 for the first match, then doubled three times for each of the three matches after the first).
 
-    Card 2 has two winning numbers (32 and 61), so it is worth 2 points.
-    Card 3 has two winning numbers (1 and 21), so it is worth 2 points.
-    Card 4 has one winning number (84), so it is worth 1 point.
-    Card 5 has no winning numbers, so it is worth no points.
-    Card 6 has no winning numbers, so it is worth no points.
+- Card 2 has two winning numbers (32 and 61), so it is worth 2 points.
+- Card 3 has two winning numbers (1 and 21), so it is worth 2 points.
+- Card 4 has one winning number (84), so it is worth 1 point.
+- Card 5 has no winning numbers, so it is worth no points.
+- Card 6 has no winning numbers, so it is worth no points.
 
 So, in this example, the Elf's pile of scratchcards is worth 13 points.
 
 Take a seat in the large pile of colorful cards. How many points are they worth in total?
 </details>
 
-**Approach**
-This problem is a parsing problem and a set intersection problem, both of which can easily be done in Python. Simply parse the numbers before and after the `|` into sets of numbers, and find the intersection using `set.intersection`.
+<details>
+<summary><b>Solution</b></summary>
+This problem is a parsing problem and a set intersection problem, both of which can easily be done in Python. Simply parse the numbers before and after the <code>|</code> into sets of numbers, and find the intersection using <code>set.intersection</code>.
+</details>
 
 ### Part 2
 
-<details>
+<details open>
 <summary><b>Problem Statement</b></summary>
 Just as you're about to report your findings to the Elf, one of you realizes that the rules have actually been printed on the back of every card this whole time.
 
@@ -325,26 +343,28 @@ Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
 Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
 ```
 
-    Card 1 has four matching numbers, so you win one copy each of the next four cards: cards 2, 3, 4, and 5.
-    Your original card 2 has two matching numbers, so you win one copy each of cards 3 and 4.
-    Your copy of card 2 also wins one copy each of cards 3 and 4.
-    Your four instances of card 3 (one original and three copies) have two matching numbers, so you win four copies each of cards 4 and 5.
-    Your eight instances of card 4 (one original and seven copies) have one matching number, so you win eight copies of card 5.
-    Your fourteen instances of card 5 (one original and thirteen copies) have no matching numbers and win no more cards.
-    Your one instance of card 6 (one original) has no matching numbers and wins no more cards.
+- Card 1 has four matching numbers, so you win one copy each of the next four cards: cards 2, 3, 4, and 5.
+- Your original card 2 has two matching numbers, so you win one copy each of cards 3 and 4.
+- Your copy of card 2 also wins one copy each of cards 3 and 4.
+- Your four instances of card 3 (one original and three copies) have two matching numbers, so you win four copies each of cards 4 and 5.
+- Your eight instances of card 4 (one original and seven copies) have one matching number, so you win eight copies of card 5.
+- Your fourteen instances of card 5 (one original and thirteen copies) have no matching numbers and win no more cards.
+- Your one instance of card 6 (one original) has no matching numbers and wins no more cards.
 
 Once all of the originals and copies have been processed, you end up with 1 instance of card 1, 2 instances of card 2, 4 instances of card 3, 8 instances of card 4, 14 instances of card 5, and 1 instance of card 6. In total, this example pile of scratchcards causes you to ultimately have 30 scratchcards!
 
 Process all of the original and copied scratchcards until no more scratchcards are won. Including the original set of scratchcards, how many total scratchcards do you end up with?
 </details>
 
-**Approach**
+<details>
+<summary><b>Solution</b></summary>
 Using the same parsed cards from part 1, keep track of the number of each card and process them iteratively. Each card just adds to downstream cards, making this a simple iterative problem.
+</details>
 
 ## Day 5: If You Give A Seed A Fertilizer
 
 ### Part 1
-<details>
+<details open>
 <summary><b>Problem Statement</b></summary>
 You take the boat and find the gardener right where you were told he would be: managing a giant "garden" that looks more to you like a farm.
 
@@ -452,12 +472,14 @@ So, the lowest location number in this example is 35.
 What is the lowest location number that corresponds to any of the initial seed numbers?
 </details>
 
-**Approach**
-Parsing the information is relatively simple. To help with calculations, a custom `Mapping`, `Range` can be made to keep track of each mapping and range operation. This allows for easy calculation of the resulting location number for every seed through the transformations. Then, the lowest location can be calculated from going through all the seeds.
+<details>
+<summary><b>Solution</b></summary>
+Parsing the information is relatively simple. To help with calculations, a custom <code>Mapping</code>, <code>Range</code> can be made to keep track of each mapping and range operation. This allows for easy calculation of the resulting location number for every seed through the transformations. Then, the lowest location can be calculated from going through all the seeds.
+</details>
 
 ### Part 2
 
-<details>
+<details open>
 <summary><b>Problem Statement</b></summary>
 Everyone will starve if you only plant such a small number of seeds. Re-reading the almanac, it looks like the seeds: line actually describes ranges of seed numbers.
 
@@ -476,7 +498,9 @@ In the above example, the lowest location number can be obtained from seed numbe
 Consider all of the initial seed numbers listed in the ranges on the first line of the almanac. What is the lowest location number that corresponds to any of the initial seed numbers?
 </details>
 
-**Approach**
-Enumerating through all the seeds is not feasible due to the large quantity of them. Thus, range operations are required. First, keep track of each seed range. For each mapping, transform them into another set of ranges. The result after applying these transformations is a list of ranges representing the resulting locations. Then, the lowest location can be calculated from the lowest `start` in each range.
+<details>
+<summary><b>Solution</b></summary>
+Enumerating through all the seeds is not feasible due to the large quantity of them. Thus, range operations are required. First, keep track of each seed range. For each mapping, transform them into another set of ranges. The result after applying these transformations is a list of ranges representing the resulting locations. Then, the lowest location can be calculated from the lowest <code>start</code> in each range.
+</details>
 
 ## Day 6:
