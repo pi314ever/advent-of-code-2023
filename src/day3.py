@@ -1,11 +1,60 @@
-from utils import get_data_lines, GridNeighborhood
+from aocd import get_data
+
+import utils
+
+DAY = 3
+
+
+def main():
+    data = get_data(day=DAY, year=utils.YEAR).splitlines()
+    grid = Grid(data)
+    assert part_1(grid) == 550064
+    assert part_2(grid) == 85010461
+
+
+def part_1(grid: "Grid"):
+    total = 0
+    for k, v in grid.num_adj.items():
+        if len(v) > 0:
+            total += int(k[2])
+    print("The sum of all part numbers is:", total)
+    return total
+
+
+def part_2(grid: "Grid"):
+    total = 0
+    for k, v in grid.symbol_adj.items():
+        if k[2] == "*" and len(v) == 2:
+            total += int(v[0]) * int(v[1])
+    print("The sum of all gear ratios is:", total)
+    return total
+
+
+def get_full_number(data: list[str], i, j):
+    # Find the full number
+    current_num = ""
+    for j_n in range(j, -1, -1):
+        if data[i][j_n].isnumeric():
+            current_num = data[i][j_n] + current_num
+        else:
+            break
+    for j_n in range(j + 1, len(data[0])):
+        if data[i][j_n].isnumeric():
+            current_num += data[i][j_n]
+        else:
+            break
+    return current_num
+
+
+def is_symbol(c: str):
+    return not c.isnumeric() and c != "."
 
 
 class Grid:
     def __init__(self, data: list[str]):
         self.data = data
         self.N, self.M = len(data), len(data[0]) - 1
-        self.neighborhood = GridNeighborhood((self.N, self.M))
+        self.neighborhood = utils.GridNeighborhood((self.N, self.M))
         self.symbol_adj = {}  # (i, j, symbol) -> [nums]
         self.num_adj = {}  # (i_start, j_start, num) -> [symbols]
         self.parse()
@@ -45,52 +94,6 @@ class Grid:
                 self.symbol_adj[(pos[0], pos[1], symbol)].append(num)
             else:
                 self.symbol_adj[(pos[0], pos[1], symbol)] = [num]
-
-
-def main():
-    data = get_data_lines("day3.txt")
-    grid = Grid(data)
-    assert part_1(grid) == 550064
-    assert part_2(grid) == 85010461
-
-
-def part_1(grid: Grid):
-    total = 0
-    for k, v in grid.num_adj.items():
-        if len(v) > 0:
-            total += int(k[2])
-    print("The sum of all part numbers is:", total)
-    return total
-
-
-def part_2(grid: Grid):
-    total = 0
-    for k, v in grid.symbol_adj.items():
-        print(k, v)
-        if k[2] == "*" and len(v) == 2:
-            total += int(v[0]) * int(v[1])
-    print("The sum of all gear ratios is:", total)
-    return total
-
-
-def get_full_number(data: list[str], i, j):
-    # Find the full number
-    current_num = ""
-    for j_n in range(j, -1, -1):
-        if data[i][j_n].isnumeric():
-            current_num = data[i][j_n] + current_num
-        else:
-            break
-    for j_n in range(j + 1, len(data[0])):
-        if data[i][j_n].isnumeric():
-            current_num += data[i][j_n]
-        else:
-            break
-    return current_num
-
-
-def is_symbol(c: str):
-    return not c.isnumeric() and c != "."
 
 
 if __name__ == "__main__":

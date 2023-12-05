@@ -1,11 +1,15 @@
-from utils import get_data_lines
-
 from typing import overload
+
+from aocd import get_data
+
+import utils
+
+DAY = 5
 
 
 def main():
-    lines = get_data_lines("day5.txt")
-    seeds, mappings = parse(lines)
+    data = get_data(day=DAY, year=utils.YEAR).splitlines()
+    seeds, mappings = parse(data)
     assert part_1(seeds, mappings) == 57075758
     assert part_2(seeds, mappings) == 31161857
 

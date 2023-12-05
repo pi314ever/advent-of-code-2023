@@ -1,9 +1,14 @@
 from dataclasses import dataclass
-from utils import get_data_lines
+
+from aocd import get_data
+
+import utils
+
+DAY = 2
 
 
 def main():
-    data = get_data_lines("day2.txt")
+    data = get_data(day=DAY, year=utils.YEAR).splitlines()
     assert part_1(data) == 2563
     assert part_2(data) == 70768
 

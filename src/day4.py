@@ -1,25 +1,29 @@
-from utils import get_data_lines
+from aocd import get_data
+
+import utils
+
+DAY = 4
 
 
 def main():
-    lines = get_data_lines("day4.txt")
-    assert part_1(lines) == 26426
-    assert part_2(lines) == 6227972
+    data = get_data(day=DAY, year=utils.YEAR).splitlines()
+    assert part_1(data) == 26426
+    assert part_2(data) == 6227972
 
 
-def part_1(lines):
+def part_1(data):
     total = 0
-    for line in lines:
+    for line in data:
         card = Card(line)
         total += card.worth()
     print("The total worth of all cards is", total)
     return total
 
 
-def part_2(lines):
-    num_cards = [1 for _ in range(len(lines))]
-    num_matches = [0 for _ in range(len(lines))]
-    for i, line in enumerate(lines):
+def part_2(data):
+    num_cards = [1 for _ in range(len(data))]
+    num_matches = [0 for _ in range(len(data))]
+    for i, line in enumerate(data):
         card = Card(line)
         num_matches[i] = card.matches
         for j in range(card.matches):
