@@ -10,7 +10,8 @@ DAY = 10
 def main():
     data = get_data(day=DAY, year=utils.YEAR).splitlines()
     ans, path = part_1(data)
-    part_2(data, path)
+    assert ans == 6820
+    assert part_2(data, path) == 337
 
 
 def part_1(data: list[str]):
@@ -37,10 +38,10 @@ def part_1(data: list[str]):
     max_depth = 0
     while not q.empty():
         i, j, depth = q.get()
-        if depth > max_depth:
-            max_depth = depth
         if (i, j) in seen:
             continue
+        if depth > max_depth:
+            max_depth = depth
         # print("Visiting: ", (i, j), "Pipe: ", data[i][j], "Depth: ", depth)
         seen.add((i, j))
         for d in Pipe.CHOICES[data[i][j]]:
@@ -51,18 +52,14 @@ def part_1(data: list[str]):
 
 
 def part_2(data: list[str], path: set[tuple[int, int]]):
-    N, M = len(data), len(data[0])
-
     count = 0
     for i, line in enumerate(data):
         parity = 0
         direction = None
         for j, char in enumerate(line):
             if (i, j) not in path and parity % 2:
-                print(f"\033[92m{char}\033[0m", end="")
                 count += 1
             elif (i, j) in path:
-                print(char, end="")
                 if char == "|":
                     parity += 1
                     direction = None
@@ -79,10 +76,8 @@ def part_2(data: list[str], path: set[tuple[int, int]]):
                     elif char == "J" and direction == "L":
                         parity += 1
                         direction = None
-            else:
-                print(f"\033[94m{char}\033[0m", end="")
-        print()
     print("Count: ", count)
+    return count
 
 
 def starting_pos(data):
