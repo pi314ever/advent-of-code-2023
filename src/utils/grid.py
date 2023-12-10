@@ -1,10 +1,3 @@
-from pathlib import Path
-
-ROOT_DIR = Path(__file__).parent.parent
-DATA_DIR = ROOT_DIR / "data"
-YEAR = 2023
-
-
 class GridNeighborhood:
     def __init__(self, dimensions: tuple[int, int]) -> None:
         self.N, self.M = dimensions
@@ -71,9 +64,3 @@ class GridNeighborhood:
             for i in range(i_min, i_max + 1):
                 neighbors.append((i, j_max + 1))
         return neighbors
-
-
-if __name__ == "__main__":
-    # Test neighbors
-    neighborhood = GridNeighborhood((5, 5))
-    print(neighborhood.get_block_neighbors((1, 1), (1, 3), diagonals=True))
