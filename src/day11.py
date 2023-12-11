@@ -11,38 +11,31 @@ SPACE = "."
 def main():
     data = get_data(day=DAY, year=utils.YEAR).splitlines()
     grid = Grid(data)
-    expanded_grid = expand(grid)
-    part_1(expanded_grid)
-    part_2(grid)
+    assert part_1(grid) == 9627977
+    assert part_2(grid) == 644248339497
 
 
 def part_1(grid: Grid):
+    empty_rows, empty_cols = get_empty_rows_cols(grid)
     galaxies = [pos for pos, _ in grid.to_iter(indices=True) if grid[pos] == GALAXY]
+    galaxies = [expand_point(g, empty_rows, empty_cols) for g in galaxies]
     total = 0
     for i, g1 in enumerate(galaxies):
         for g2 in galaxies[i + 1 :]:
             total += utils.manhattan_distance(g1, g2)
-    print(total)
+    print("Sum of distances, expand by 1: ", total)
     return total
 
 
 def part_2(grid: Grid):
-    # Find positions of empty rows and cols
-    empty_rows = []
-    empty_cols = []
-    for i, row in enumerate(grid.iter_rows()):
-        if not any(c == GALAXY for c in row):
-            empty_rows.append(i)
-    for j, col in enumerate(grid.iter_cols()):
-        if not any(c == GALAXY for c in col):
-            empty_cols.append(j)
+    empty_rows, empty_cols = get_empty_rows_cols(grid)
     galaxies = [pos for pos, _ in grid.to_iter(indices=True) if grid[pos] == GALAXY]
     galaxies = [expand_point(g, empty_rows, empty_cols, 999999) for g in galaxies]
     total = 0
     for i, g1 in enumerate(galaxies):
         for g2 in galaxies[i + 1 :]:
             total += utils.manhattan_distance(g1, g2)
-    print(total)
+    print("Sum of distances, expand by 999999: ", total)
     return total
 
 
@@ -62,29 +55,17 @@ def expand_point(pos, empty_rows, empty_cols, extra_spaces=1):
     return (i, j)
 
 
-def expand(grid: Grid):
-    """Expand grid for every row/col of empty space"""
-    new_grid = []
-    for row in grid.iter_rows():
-        for c in row:
-            if c == GALAXY:
-                new_grid.append(row)
-                break
-        else:
-            new_grid.append(row)
-            new_grid.append(row)
-    grid = Grid(new_grid)
-    new_grid = []
-    for col in grid.iter_cols():
-        for c in col:
-            if c == GALAXY:
-                new_grid.append(col)
-                break
-        else:
-            new_grid.append(col)
-            new_grid.append(col)
-    grid = Grid(new_grid)
-    return Grid([*list(grid.iter_cols())])
+def get_empty_rows_cols(grid: Grid):
+    # Find positions of empty rows and cols
+    empty_rows = []
+    empty_cols = []
+    for i, row in enumerate(grid.iter_rows()):
+        if not any(c == GALAXY for c in row):
+            empty_rows.append(i)
+    for j, col in enumerate(grid.iter_cols()):
+        if not any(c == GALAXY for c in col):
+            empty_cols.append(j)
+    return empty_rows, empty_cols
 
 
 if __name__ == "__main__":
