@@ -1,3 +1,6 @@
+from typing import Any, Literal, Optional, overload, Generator
+
+
 class GridNeighborhood:
     def __init__(self, dimensions: tuple[int, int]) -> None:
         self.N, self.M = dimensions
@@ -108,11 +111,13 @@ class Grid:
         """
         self._N = len(data)
         self._M = len(data[0])
-        self.data = [[data[i][j] for j in range(self._M)] for i in range(self._N)]
+        self.data: list[list[str]] = [
+            [data[i][j] for j in range(self._M)] for i in range(self._N)
+        ]
         self.neighborhood = GridNeighborhood((self._N, self._M))
         self.directions = directions
         self._updated = False
-        self._items = None
+        self._items_counts: Optional[dict[str, int]] = None
 
     @property
     def updated(self):
@@ -129,14 +134,46 @@ class Grid:
     @property
     def items(self):
         """Lazy evaluated set of items in the grid"""
-        if self._items is None or self._updated:
-            self._items = set(self.to_iter())
-        return self._items
+        if self._items_counts is None or self._updated:
+            self._update_counts()
+        return set(self._items_counts.keys())  # type: ignore
+
+    @property
+    def item_counts(self) -> dict[str, int]:
+        """Lazy evaluated dict of item counts in the grid"""
+        if self._items_counts is None or self._updated:
+            self._update_counts()
+        return self._items_counts  # type: ignore
+
+    def _update_counts(self):
+        self._updated = False
+        self._items_counts = {}
+        for item in self.to_iter():
+            self._items_counts[item] = self._items_counts.get(item, 0) + 1
+
+    def __str__(self):
+        return "\n".join("".join(row) for row in self.data)
+
+    @overload
+    def __getitem__(self, key: tuple[int, int]) -> str:
+        ...
+
+    @overload
+    def __getitem__(self, key: int) -> list[str]:
+        ...
 
     def __getitem__(self, key: tuple[int, int] | int):
         if isinstance(key, int):
             return self.data[key]
         return self.data[key[0]][key[1]]
+
+    @overload
+    def __setitem__(self, key: tuple[int, int], value: str):
+        ...
+
+    @overload
+    def __setitem__(self, key: int, value: list[str]):
+        ...
 
     def __setitem__(self, key: tuple[int, int] | int, value):
         self._updated = True
@@ -147,16 +184,44 @@ class Grid:
             return
         self.data[key[0]][key[1]] = value
 
-    def to_iter(self, column_major=False):
+    @overload
+    def to_iter(
+        self, column_major: bool = False, indices: Literal[False] = False
+    ) -> Generator[str, Any, None]:
+        ...
+
+    @overload
+    def to_iter(
+        self, column_major: bool = False, indices: Literal[True] = True
+    ) -> Generator[tuple[tuple[int, int], str], Any, None]:
+        ...
+
+    def to_iter(self, column_major=False, indices=False):
         """Iterate over the grid, defaulting to row-major order"""
         if column_major:
             for j in range(self._M):
                 for i in range(self._N):
-                    yield self.data[i][j]
+                    if indices:
+                        yield (i, j), self.data[i][j]
+                    else:
+                        yield self.data[i][j]
         else:
             for i in range(self._N):
                 for j in range(self._M):
-                    yield self.data[i][j]
+                    if indices:
+                        yield (i, j), self.data[i][j]
+                    else:
+                        yield self.data[i][j]
+
+    def iter_rows(self):
+        """Iterate over the rows of the grid"""
+        for row in self.data:
+            yield row
+
+    def iter_cols(self):
+        """Iterate over the columns of the grid"""
+        for j in range(self._M):
+            yield [self.data[i][j] for i in range(self._N)]
 
     def neighbors(self, pos: tuple[int, int], diagonals=False) -> list[tuple[int, int]]:
         return self.neighborhood.get_neighbors(pos, diagonals)
@@ -179,3 +244,8 @@ class Grid:
         if self.is_valid_pos(new_point):
             return new_point
         return pos
+
+
+def manhattan_distance(pos1: tuple[int, int], pos2: tuple[int, int]) -> int:
+    """Manhattan distance between two points"""
+    return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
