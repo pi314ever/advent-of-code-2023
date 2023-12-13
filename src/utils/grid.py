@@ -145,6 +145,29 @@ class Grid:
             self._update_counts()
         return self._items_counts  # type: ignore
 
+    def col(self, j: int) -> list[str]:
+        """Get the jth column of the grid"""
+        return [self.data[i][j] for i in range(self._N)]
+
+    def row(self, i: int) -> list[str]:
+        """Get the ith row of the grid"""
+        return self.data[i]
+
+    def set_row(self, i: int, row: list[str]):
+        """Set the ith row of the grid"""
+        if len(row) != self._M:
+            raise ValueError("Invalid length")
+        self._updated = True
+        self.data[i] = row
+
+    def set_col(self, j: int, col: list[str]):
+        """Set the jth column of the grid"""
+        if len(col) != self._N:
+            raise ValueError("Invalid length")
+        self._updated = True
+        for i in range(self._N):
+            self.data[i][j] = col[i]
+
     def _update_counts(self):
         self._updated = False
         self._items_counts = {}
