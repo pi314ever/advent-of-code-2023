@@ -118,6 +118,7 @@ class Grid:
         self.directions = directions
         self._updated = False
         self._items_counts: Optional[dict[str, int]] = None
+        self._hash: Optional[int] = None
 
     @property
     def updated(self):
@@ -267,6 +268,18 @@ class Grid:
         if self.is_valid_pos(new_point):
             return new_point
         return pos
+
+    @property
+    def hash(self):
+        if self._hash is None or self._updated:
+            self._hash = self._compute_hash()
+        return self._hash
+
+    def _compute_hash(self):
+        return hash(tuple(tuple(row) for row in self.data))
+
+    def __hash__(self):
+        return self.hash
 
 
 def manhattan_distance(pos1: tuple[int, int], pos2: tuple[int, int]) -> int:
