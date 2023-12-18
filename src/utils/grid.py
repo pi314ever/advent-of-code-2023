@@ -94,11 +94,14 @@ class Direction:
         raise ValueError("Invalid src and dst positions")
 
     @staticmethod
-    def move(pos: tuple[int, int], direction: str) -> tuple[int, int]:
+    def move(
+        pos: tuple[int, int], direction: str, distance: int = 1
+    ) -> tuple[int, int]:
         """Move the position in the given direction"""
         i, j = pos
         i_delta, j_delta = Direction.COORDINATES[direction]
-        return (i + i_delta, j + j_delta)
+
+        return (i + i_delta * distance, j + j_delta * distance)
 
     @staticmethod
     def list() -> list[str]:
@@ -304,11 +307,16 @@ class Grid:
     def get_direction(self, src: tuple[int, int], dst: tuple[int, int]) -> str:
         return self.directions.get_from(src, dst)
 
-    def move_point(self, pos: tuple[int, int], direction: str) -> tuple[int, int]:
+    def move_point(
+        self, pos: tuple[int, int], direction: str, distance: int = 1
+    ) -> tuple[int, int]:
         """Move the point in the given direction, if possible. Otherwise, stay in place."""
-        new_point = self.directions.move(pos, direction)
+        new_point = self.directions.move(pos, direction, distance)
         if self.is_valid_pos(new_point):
             return new_point
+        raise ValueError(
+            f"Invalid move: {pos} -- {direction}, {distance} --> {new_point}"
+        )
         return pos
 
     @property
