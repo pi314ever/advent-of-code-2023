@@ -100,6 +100,44 @@ class Direction:
         i_delta, j_delta = Direction.COORDINATES[direction]
         return (i + i_delta, j + j_delta)
 
+    @staticmethod
+    def list() -> list[str]:
+        return list(Direction.COORDINATES.keys())
+
+    @staticmethod
+    def opposite(direction: str) -> str:
+        if direction == Direction.NORTH:
+            return Direction.SOUTH
+        if direction == Direction.SOUTH:
+            return Direction.NORTH
+        if direction == Direction.EAST:
+            return Direction.WEST
+        if direction == Direction.WEST:
+            return Direction.EAST
+        raise ValueError("Invalid direction")
+
+    @staticmethod
+    def rotate(direction: str, clockwise: bool = True) -> str:
+        if clockwise:
+            if direction == Direction.NORTH:
+                return Direction.EAST
+            if direction == Direction.SOUTH:
+                return Direction.WEST
+            if direction == Direction.EAST:
+                return Direction.SOUTH
+            if direction == Direction.WEST:
+                return Direction.NORTH
+        else:
+            if direction == Direction.NORTH:
+                return Direction.WEST
+            if direction == Direction.SOUTH:
+                return Direction.EAST
+            if direction == Direction.EAST:
+                return Direction.NORTH
+            if direction == Direction.WEST:
+                return Direction.SOUTH
+        raise ValueError("Invalid direction")
+
 
 class Grid:
     """General class for storing a grid of data"""
@@ -114,7 +152,7 @@ class Grid:
         self.data: list[list[str]] = [
             [data[i][j] for j in range(self._M)] for i in range(self._N)
         ]
-        self.neighborhood = GridNeighborhood((self._N, self._M))
+        self._neighborhood = GridNeighborhood((self._N, self._M))
         self.directions = directions
         self._updated = False
         self._items_counts: Optional[dict[str, int]] = None
@@ -145,6 +183,10 @@ class Grid:
         if self._items_counts is None or self._updated:
             self._update_counts()
         return self._items_counts  # type: ignore
+
+    @property
+    def bottom_right(self) -> tuple[int, int]:
+        return self.N - 1, self.M - 1
 
     def col(self, j: int) -> list[str]:
         """Get the jth column of the grid"""
@@ -248,12 +290,12 @@ class Grid:
             yield [self.data[i][j] for i in range(self._N)]
 
     def neighbors(self, pos: tuple[int, int], diagonals=False) -> list[tuple[int, int]]:
-        return self.neighborhood.get_neighbors(pos, diagonals)
+        return self._neighborhood.get_neighbors(pos, diagonals)
 
     def block_neighbors(
         self, pos1: tuple[int, int], pos2: tuple[int, int], diagonals=False
     ) -> list[tuple[int, int]]:
-        return self.neighborhood.get_block_neighbors(pos1, pos2, diagonals)
+        return self._neighborhood.get_block_neighbors(pos1, pos2, diagonals)
 
     def is_valid_pos(self, pos: tuple[int, int]) -> bool:
         i, j = pos
@@ -280,6 +322,20 @@ class Grid:
 
     def __hash__(self):
         return self.hash
+
+    def transpose(self):
+        empty_grid = Grid([["" for _ in range(self.N)] for _ in range(self.M)])
+        for i in range(self.N):
+            for j in range(self.M):
+                empty_grid[j, i] = self[i, j]
+        return empty_grid
+
+    def replace(self, old: str, new: str):
+        self._updated = True
+        for i in range(self.N):
+            for j in range(self.M):
+                if self[i, j] == old:
+                    self[i, j] = new
 
 
 def manhattan_distance(pos1: tuple[int, int], pos2: tuple[int, int]) -> int:
