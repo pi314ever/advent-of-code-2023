@@ -17,7 +17,7 @@ def main():
 
 def part_1(grid: Grid):
     empty_rows, empty_cols = get_empty_rows_cols(grid)
-    galaxies = [pos for pos, _ in grid.to_iter(indices=True) if grid[pos] == GALAXY]
+    galaxies = [pos for pos, _ in grid.iter(indices=True) if grid[pos] == GALAXY]
     galaxies = [expand_point(g, empty_rows, empty_cols) for g in galaxies]
     total = 0
     for i, g1 in enumerate(galaxies):
@@ -29,7 +29,7 @@ def part_1(grid: Grid):
 
 def part_2(grid: Grid):
     empty_rows, empty_cols = get_empty_rows_cols(grid)
-    galaxies = [pos for pos, _ in grid.to_iter(indices=True) if grid[pos] == GALAXY]
+    galaxies = [pos for pos, _ in grid.iter(indices=True) if grid[pos] == GALAXY]
     galaxies = [expand_point(g, empty_rows, empty_cols, 999999) for g in galaxies]
     total = 0
     for i, g1 in enumerate(galaxies):

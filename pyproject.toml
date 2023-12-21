@@ -12,6 +12,8 @@ advent-of-code-data = "^2.0.1"
 matplotlib = "^3.8.2"
 networkx = "^3.2.1"
 pygraphviz = "^1.11"
+scipy = "^1.11.4"
+tqdm = "^4.66.1"
 
 
 [build-system]

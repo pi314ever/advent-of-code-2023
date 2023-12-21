@@ -34,7 +34,7 @@ def part_1(grid: Grid):
         if (pos, direction, direction_count) in seen:
             continue
         seen.add((pos, direction, direction_count))
-        for new_direction in Direction.list():
+        for new_direction in Direction.list_names():
             new_pos = grid.move_point(pos, new_direction)
             if pos == new_pos or new_direction == Direction.opposite(
                 direction
@@ -87,7 +87,7 @@ def part_2(grid: Grid):
                 )
             continue
         # Loop through all directions
-        for new_direction in Direction.list():
+        for new_direction in Direction.list_names():
             new_pos = grid.move_point(pos, new_direction)
             # Skip if position is the same (tried to move into wall) or if we are moving in the opposite direction
             if pos == new_pos or new_direction == Direction.opposite(direction):

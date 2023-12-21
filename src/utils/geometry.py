@@ -27,6 +27,11 @@ def picks_theorem(i: int, b: int) -> float:
     return i + b / 2 - 1
 
 
+def manhattan_distance(pos1: tuple[int, int], pos2: tuple[int, int]) -> int:
+    """Manhattan distance between two points"""
+    return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
+
+
 if __name__ == "__main__":
     assert shoelace_area([(0, 0), (1, 0), (1, 1), (0, 1)]) == 1
     assert shoelace_area([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]) == 1

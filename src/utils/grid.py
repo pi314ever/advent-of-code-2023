@@ -1,23 +1,33 @@
 from typing import Any, Literal, Optional, overload, Generator
 
+from .typing import POS_TYPE
+
 
 class GridNeighborhood:
-    def __init__(self, dimensions: tuple[int, int]) -> None:
+    def __init__(self, dimensions: POS_TYPE) -> None:
         self.N, self.M = dimensions
 
     def get_neighbors(
-        self, pos: tuple[int, int], diagonals=False
-    ) -> list[tuple[int, int]]:
+        self, pos: POS_TYPE, diagonals=False, loop=False
+    ) -> list[POS_TYPE]:
         i, j = pos
         neighbors = []
         if i > 0:
             neighbors.append((i - 1, j))
+        elif i == 0 and loop:
+            neighbors.append((self.N - 1, j))
         if i < self.N - 1:
             neighbors.append((i + 1, j))
+        elif i == self.N - 1 and loop:
+            neighbors.append((0, j))
         if j > 0:
             neighbors.append((i, j - 1))
+        elif j == 0 and loop:
+            neighbors.append((i, self.M - 1))
         if j < self.M - 1:
             neighbors.append((i, j + 1))
+        elif j == self.M - 1 and loop:
+            neighbors.append((i, 0))
         if diagonals:
             if i > 0 and j > 0:
                 neighbors.append((i - 1, j - 1))
@@ -30,8 +40,8 @@ class GridNeighborhood:
         return neighbors
 
     def get_block_neighbors(
-        self, pos1: tuple[int, int], pos2: tuple[int, int], diagonals=False
-    ) -> list[tuple[int, int]]:
+        self, pos1: POS_TYPE, pos2: POS_TYPE, diagonals=False
+    ) -> list[POS_TYPE]:
         """Get the neighbors of the rectangle defined by pos1 and pos2"""
         neighbors = []
         i1, j1 = pos1
@@ -74,38 +84,63 @@ class Direction:
     SOUTH = "S"
     EAST = "E"
     WEST = "W"
+    NORTH_EAST = "NE"
+    NORTH_WEST = "NW"
+    SOUTH_EAST = "SE"
+    SOUTH_WEST = "SW"
 
-    COORDINATES = {
+    ALL_COORDINATES = {
         NORTH: (-1, 0),
         SOUTH: (1, 0),
         EAST: (0, 1),
         WEST: (0, -1),
+        NORTH_EAST: (-1, 1),
+        NORTH_WEST: (-1, -1),
+        SOUTH_EAST: (1, 1),
+        SOUTH_WEST: (1, -1),
     }
+    DIAGONALS = set([NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST])
 
     @staticmethod
-    def get_from(src: tuple[int, int], dst: tuple[int, int]) -> str:
+    def get_from(src: POS_TYPE, dst: POS_TYPE, diagonal=False) -> str:
         """Get the direction from src to dst"""
         i_src, j_src = src
         i_dst, j_dst = dst
-        for k, v in Direction.COORDINATES.items():
+        for k, v in Direction.ALL_COORDINATES.items():
             i, j = v
             if i_dst == i_src + i and j_dst == j_src + j:
                 return k
         raise ValueError("Invalid src and dst positions")
 
     @staticmethod
-    def move(
-        pos: tuple[int, int], direction: str, distance: int = 1
-    ) -> tuple[int, int]:
+    def move(pos: POS_TYPE, direction: str, distance: int = 1) -> POS_TYPE:
         """Move the position in the given direction"""
+        if direction not in Direction.ALL_COORDINATES:
+            raise ValueError(
+                f"Invalid direction {direction}. Valid directions: {Direction.list_names()}"
+            )
         i, j = pos
-        i_delta, j_delta = Direction.COORDINATES[direction]
+        i_delta, j_delta = Direction.ALL_COORDINATES[direction]
 
         return (i + i_delta * distance, j + j_delta * distance)
 
     @staticmethod
-    def list() -> list[str]:
-        return list(Direction.COORDINATES.keys())
+    def list_names(diagonals=False) -> list[str]:
+        if diagonals:
+            return list(Direction.ALL_COORDINATES.keys())
+        return list(
+            k for k in Direction.ALL_COORDINATES.keys() if k not in Direction.DIAGONALS
+        )
+
+    @staticmethod
+    def list_deltas(diagonals=False) -> list[POS_TYPE]:
+        if diagonals:
+            return list(Direction.ALL_COORDINATES.values())
+        return list(
+            v
+            for k, v in Direction.ALL_COORDINATES.items()
+            if k not in Direction.DIAGONALS
+        )
 
     @staticmethod
     def opposite(direction: str) -> str:
@@ -117,6 +152,14 @@ class Direction:
             return Direction.WEST
         if direction == Direction.WEST:
             return Direction.EAST
+        if direction == Direction.NORTH_EAST:
+            return Direction.SOUTH_WEST
+        if direction == Direction.SOUTH_WEST:
+            return Direction.NORTH_EAST
+        if direction == Direction.NORTH_WEST:
+            return Direction.SOUTH_EAST
+        if direction == Direction.SOUTH_EAST:
+            return Direction.NORTH_WEST
         raise ValueError("Invalid direction")
 
     @staticmethod
@@ -188,7 +231,7 @@ class Grid:
         return self._items_counts  # type: ignore
 
     @property
-    def bottom_right(self) -> tuple[int, int]:
+    def bottom_right(self) -> POS_TYPE:
         return self.N - 1, self.M - 1
 
     def col(self, j: int) -> list[str]:
@@ -217,34 +260,34 @@ class Grid:
     def _update_counts(self):
         self._updated = False
         self._items_counts = {}
-        for item in self.to_iter():
+        for item in self.iter():
             self._items_counts[item] = self._items_counts.get(item, 0) + 1
 
     def __str__(self):
         return "\n".join("".join(row) for row in self.data)
 
     @overload
-    def __getitem__(self, key: tuple[int, int]) -> str:
+    def __getitem__(self, key: POS_TYPE) -> str:
         ...
 
     @overload
     def __getitem__(self, key: int) -> list[str]:
         ...
 
-    def __getitem__(self, key: tuple[int, int] | int):
+    def __getitem__(self, key: POS_TYPE | int):
         if isinstance(key, int):
             return self.data[key]
         return self.data[key[0]][key[1]]
 
     @overload
-    def __setitem__(self, key: tuple[int, int], value: str):
+    def __setitem__(self, key: POS_TYPE, value: str):
         ...
 
     @overload
     def __setitem__(self, key: int, value: list[str]):
         ...
 
-    def __setitem__(self, key: tuple[int, int] | int, value):
+    def __setitem__(self, key: POS_TYPE | int, value):
         self._updated = True
         if isinstance(key, int):
             if len(value) != self._M:
@@ -254,18 +297,18 @@ class Grid:
         self.data[key[0]][key[1]] = value
 
     @overload
-    def to_iter(
+    def iter(
         self, column_major: bool = False, indices: Literal[False] = False
     ) -> Generator[str, Any, None]:
         ...
 
     @overload
-    def to_iter(
+    def iter(
         self, column_major: bool = False, indices: Literal[True] = True
-    ) -> Generator[tuple[tuple[int, int], str], Any, None]:
+    ) -> Generator[tuple[POS_TYPE, str], Any, None]:
         ...
 
-    def to_iter(self, column_major=False, indices=False):
+    def iter(self, column_major=False, indices=False):
         """Iterate over the grid, defaulting to row-major order"""
         if column_major:
             for j in range(self._M):
@@ -282,6 +325,9 @@ class Grid:
                     else:
                         yield self.data[i][j]
 
+    def linear_index(self, i: int, j: int) -> int:
+        return i * self.M + j
+
     def iter_rows(self):
         """Iterate over the rows of the grid"""
         for row in self.data:
@@ -292,24 +338,22 @@ class Grid:
         for j in range(self._M):
             yield [self.data[i][j] for i in range(self._N)]
 
-    def neighbors(self, pos: tuple[int, int], diagonals=False) -> list[tuple[int, int]]:
+    def neighbors(self, pos: POS_TYPE, diagonals=False) -> list[POS_TYPE]:
         return self._neighborhood.get_neighbors(pos, diagonals)
 
     def block_neighbors(
-        self, pos1: tuple[int, int], pos2: tuple[int, int], diagonals=False
-    ) -> list[tuple[int, int]]:
+        self, pos1: POS_TYPE, pos2: POS_TYPE, diagonals=False
+    ) -> list[POS_TYPE]:
         return self._neighborhood.get_block_neighbors(pos1, pos2, diagonals)
 
-    def is_valid_pos(self, pos: tuple[int, int]) -> bool:
+    def is_valid_pos(self, pos: POS_TYPE) -> bool:
         i, j = pos
         return 0 <= i < self._N and 0 <= j < self._M
 
-    def get_direction(self, src: tuple[int, int], dst: tuple[int, int]) -> str:
+    def get_direction(self, src: POS_TYPE, dst: POS_TYPE) -> str:
         return self.directions.get_from(src, dst)
 
-    def move_point(
-        self, pos: tuple[int, int], direction: str, distance: int = 1
-    ) -> tuple[int, int]:
+    def move_point(self, pos: POS_TYPE, direction: str, distance: int = 1) -> POS_TYPE:
         """Move the point in the given direction, if possible. Otherwise, stay in place."""
         new_point = self.directions.move(pos, direction, distance)
         if self.is_valid_pos(new_point):
@@ -317,7 +361,6 @@ class Grid:
         raise ValueError(
             f"Invalid move: {pos} -- {direction}, {distance} --> {new_point}"
         )
-        return pos
 
     @property
     def hash(self):
@@ -345,7 +388,15 @@ class Grid:
                 if self[i, j] == old:
                     self[i, j] = new
 
+    def find(self, item: str):
+        for i in range(self.N):
+            for j in range(self.M):
+                if self[i, j] == item:
+                    return i, j
+        raise ValueError(f"Item {item} not found in grid")
 
-def manhattan_distance(pos1: tuple[int, int], pos2: tuple[int, int]) -> int:
-    """Manhattan distance between two points"""
-    return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
+    def find_all(self, item: str):
+        for i in range(self.N):
+            for j in range(self.M):
+                if self[i, j] == item:
+                    yield i, j
