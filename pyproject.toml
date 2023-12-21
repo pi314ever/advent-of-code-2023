@@ -10,6 +10,8 @@ python = "^3.11"
 numpy = "^1.26.2"
 advent-of-code-data = "^2.0.1"
 matplotlib = "^3.8.2"
+networkx = "^3.2.1"
+pygraphviz = "^1.11"
 
 
 [build-system]
