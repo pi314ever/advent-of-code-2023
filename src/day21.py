@@ -1,11 +1,9 @@
 from aocd import get_data
 from collections import deque
-import numpy as np
-from scipy.sparse import csr_matrix, lil_matrix
 from tqdm import tqdm
 
 import utils
-from utils import Grid, InfiniteGrid
+from utils import Grid, InfiniteGrid, Direction
 
 DAY = 21
 
@@ -20,11 +18,49 @@ def main():
     test_grid = Grid(test_data)
     grid = Grid(data)
     part_1(grid)
-    part_2(test_grid, 5000)
-    # part_2(grid)
+    # part_2(test_grid, 5000)
+    part_2(grid)
+    # quadratic(grid)
 
 
 def part_1(grid: Grid):
+    total = bfs_search(grid)
+    print(total)
+    return total
+
+
+def part_2(grid: Grid, n_steps=26501365):
+    infinite_grid = InfiniteGrid.from_grid(grid)
+
+    # Split n_steps into remainder and number of chunks
+    tiles, remainder = divmod(n_steps, infinite_grid.N)
+    points = []
+    # Iterate three times
+    steps = [remainder + infinite_grid.N * i for i in range(3)]
+    print(steps)
+    for s in steps:
+        points.append(bfs_search(infinite_grid, s))
+        # print("point", len(points), points[-1], "after", s, "steps")
+
+    def f(n):
+        y0 = points[0]
+        y1 = points[1]
+        y2 = points[2]
+        a = (y2 + y0 - 2 * y1) / 2
+        b = y1 - y0 - a
+        c = y0
+        return a * n**2 + b * n + c
+
+    assert all(
+        f(i) == p for i, p in enumerate(points)
+    ), "Error in quadratic extrapolation"
+
+    ans = int(f(n_steps // infinite_grid.N))
+    print(ans)
+    return ans
+
+
+def bfs_search(grid: Grid, depth=64):
     start = grid.find(START)
     q = deque()
     q.append((start, 0))
@@ -32,10 +68,10 @@ def part_1(grid: Grid):
     total = 0
     step = 0
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    with tqdm(total=64) as pbar:
+    with tqdm(total=depth, leave=False) as pbar:
         while q:
             pos, dist = q.popleft()
-            if dist > 64:
+            if dist > depth:
                 break
             if pos in seen:
                 continue
@@ -44,80 +80,100 @@ def part_1(grid: Grid):
                 pbar.update(dist - step)
                 # pbar.display(f"len(q) = {len(q)}")
                 step = dist
-            if dist % 2 == 64 % 2:
+            if dist % 2 == depth % 2:
                 total += 1
-            if dist < 64:
+            if dist < depth:
                 for dx, dy in directions:
                     neighbor = (pos[0] + dx, pos[1] + dy)
                     if grid[neighbor] != ROCK:
                         q.append((neighbor, dist + 1))
-    print(total)
     return total
 
 
-def part_2(grid: Grid, n_steps=26501365):
+def part_2_direct(grid: Grid, n_steps=26501365):
     # TODO: Pre-compute the distances from 9 key points to all other points.
     # Data is structured as:
     #  grid: (n x m)
-    #   w_1 + w_2 = m
+    #        m
     #   _____|_____
-    #  | w_1 | w_2 |
+    #  | m/2 | m/2 |
     #  A.....B.....C   |
-    #  .     .     .   |-> l_1
+    #  .     .     .   |-> n/2
     #  .     .     .   |
-    #  D.....S.....E   ----------> l_1 + l_2 = n
+    #  D.....S.....E   ---------->  n
     #  .     .     .   |
-    #  .     .     .   |-> l_2
+    #  .     .     .   |-> n/2
     #  F.....G.....H   |
     # Where S is the start and the letters are external entrances.
     # The shortest distance from S to some point (P) n_steps distance away from S to the right is:
     # w_2 + m * ((n_steps - w_2) // m) + distance[D][local[P]] == n_steps
     #
-    ...
+    # This solution requires n == m both odd, n_steps % n == n // 2, and S to be in the center.
+    #
+
+    infinite_grid = InfiniteGrid.from_grid(grid)
+    start = infinite_grid.find(START)
+
+    assert grid.N == grid.M, "Grid must be square"
+    assert start == (grid.N // 2, grid.M // 2), "Start must be in the center"
+    assert grid.N % 2 == 1, "Grid must have odd width"
+
+    # Split n_steps into remainder and number of chunks
+    tiles, remainder = divmod(n_steps, infinite_grid.N)
+
+    # Precompute distances from key points
+    key_points = grid.corners + [
+        (0, start[1]),
+        (infinite_grid.N - 1, start[1]),
+        (start[0], 0),
+        (start[0], infinite_grid.M - 1),
+    ]
+    search_distances = [65] * 4 + [131] * 4
 
 
-# def propagation_diamonds(start: tuple[int, int], n_steps):
-#     "Gives yields diamond of positions reachable in n_steps"
-#     x, y = start
+def quadratic(grid: Grid):
+    dc, dr = [1, 0, -1, 0], [0, 1, 0, -1]
+    start = grid.find(START)
+    R = set(grid.find_all(ROCK))
+    possible = {start}
+    points = {}
+    steps = 26501365
+    # Loop through all the steps
+    for s in range(1, steps):
+        new_possible = set()
+        first_pattern = [set() for _ in range(9)]
+        # Move from previously possible positions
+        for r, c in possible:
+            # Move to neighbors
+            for i in range(4):
+                rr, cc = r + dr[i], c + dc[i]
+                # Add if not a rock
+                if (rr % grid.N, cc % grid.M) not in R:
+                    new_possible.add((rr, cc))
+        # Set new possible positions
+        possible = new_possible
+        if s == 64:
+            print("part1", len(possible), "after 64 steps")
+            print("calculatin points")
+        # Save points if number of steps has the same remainder as the grid width
+        if s % grid.N == steps % grid.N:
+            points[s // grid.N] = len(possible)
+            print("point", len(points), len(possible), "after " + str(s) + " steps")
+        # Break after 3 points
+        if len(points) == 3:
+            break
 
+    # Quadratic extrapolation
+    def f(n):
+        y0 = points[0]
+        y1 = points[1]
+        y2 = points[2]
+        a = (y2 + y0 - 2 * y1) / 2
+        b = y1 - y0 - a
+        c = y0
+        return a * n**2 + b * n + c
 
-def matrix_pow(mat, n):
-    if n == 0:
-        return np.identity(mat.shape[0])
-    if n == 1:
-        return mat
-    memory = [mat]
-    pow = 1
-    num_powers = int(np.log(n) / np.log(2))
-    for i in range(num_powers):
-        print(pow)
-        memory.append(memory[-1] @ memory[-1])
-        pow *= 2
-    # Use powers of 2 to build up to n
-    result = memory[-1]
-    print(n)
-    n -= pow
-    for i in range(num_powers - 1, -1, -1):
-        print(n, 2**i)
-        if n >= 2**i:
-            result = result @ memory[i]
-            n -= 2**i
-    return result
-
-
-def adj_matrix(grid: Grid, loop=False):
-    num_walkable = grid.item_counts[GARDEN_PLOT] + grid.item_counts[START]
-    start_pos = grid.find(START)
-    plot_pos = list(grid.find_all(GARDEN_PLOT))
-    pos_to_idx = {pos: i for i, pos in enumerate([start_pos] + plot_pos)}
-    # Make adjacency matrix
-    adj = lil_matrix((num_walkable, num_walkable), dtype=int)
-    for i, pos in enumerate([start_pos] + plot_pos):
-        for neighbor in grid.neighbors(pos, loop=loop):
-            if grid[neighbor] == GARDEN_PLOT or grid[neighbor] == START:
-                adj[i, pos_to_idx[neighbor]] = 1
-                adj[pos_to_idx[neighbor], i] = 1
-    return adj.tocsr()
+    print("part2", f(steps // grid.N))
 
 
 TEST = """...........

@@ -234,6 +234,10 @@ class Grid:
     def bottom_right(self) -> POS_TYPE:
         return self.N - 1, self.M - 1
 
+    @property
+    def corners(self) -> list[POS_TYPE]:
+        return [(0, 0), (0, self.M - 1), (self.N - 1, 0), (self.N - 1, self.M - 1)]
+
     def col(self, j: int) -> list[str]:
         """Get the jth column of the grid"""
         return [self.data[i][j] for i in range(self._N)]
@@ -400,3 +404,13 @@ class Grid:
             for j in range(self.M):
                 if self[i, j] == item:
                     yield i, j
+
+    def shortest_path(
+        self,
+        src: POS_TYPE,
+        dst: POS_TYPE,
+        walkable: Optional[set] = None,
+        not_walkable: Optional[set] = None,
+    ):
+        # TODO: Implement shortest path algorithm
+        pass

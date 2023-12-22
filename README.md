@@ -65,6 +65,12 @@ Author: Daniel Huang
   - [Day 19: Aplenty](#day-19-aplenty)
     - [Part 1](#part-1-18)
     - [Part 2](#part-2-18)
+  - [Day 20: Pulse Propagation](#day-20-pulse-propagation)
+    - [Part 1](#part-1-19)
+    - [Part 2](#part-2-19)
+  - [Day 21: Step Counter](#day-21-step-counter)
+    - [Part 1](#part-1-20)
+    - [Part 2](#part-2-20)
 
 <!-- /code_chunk_output -->
 
@@ -2674,3 +2680,190 @@ Reset all modules to their default states. Waiting for all pulses to be fully ha
 This problem is particularly intractable if taken in the general case. However, we can observe the module structure and see that they are structured in 4 groups of 12-bit counters. Thus, we can simply count which bits are required for the counters to be activated, and the `rx` module will be pulsed when all counters are pulsed at the same time. That is, we take the LCM of the counters to obtain the number of steps for `rx` to be activated.
 
 </details>
+
+## Day 21: Step Counter
+
+### Part 1
+
+<details open>
+<summary><b>Problem Statement</b></summary>
+
+You manage to catch the airship right as it's dropping someone else off on their all-expenses-paid trip to Desert Island! It even helpfully drops you off near the gardener and his massive farm.
+
+"You got the sand flowing again! Great work! Now we just need to wait until we have enough sand to filter the water for Snow Island and we'll have snow again in no time."
+
+While you wait, one of the Elves that works with the gardener heard how good you are at solving problems and would like your help. He needs to get his steps in for the day, and so he'd like to know which garden plots he can reach with exactly his remaining 64 steps.
+
+He gives you an up-to-date map (your puzzle input) of his starting position (S), garden plots (.), and rocks (#). For example:
+
+```
+...........
+.....###.#.
+.###.##..#.
+..#.#...#..
+....#.#....
+.##..S####.
+.##..#...#.
+.......##..
+.##.#.####.
+.##..##.##.
+...........
+```
+
+The Elf starts at the starting position (S) which also counts as a garden plot. Then, he can take one step north, south, east, or west, but only onto tiles that are garden plots. This would allow him to reach any of the tiles marked O:
+
+```
+...........
+.....###.#.
+.###.##..#.
+..#.#...#..
+....#O#....
+.##.OS####.
+.##..#...#.
+.......##..
+.##.#.####.
+.##..##.##.
+...........
+```
+
+Then, he takes a second step. Since at this point he could be at either tile marked O, his second step would allow him to reach any garden plot that is one step north, south, east, or west of any tile that he could have reached after the first step:
+
+```
+...........
+.....###.#.
+.###.##..#.
+..#.#O..#..
+....#.#....
+.##O.O####.
+.##.O#...#.
+.......##..
+.##.#.####.
+.##..##.##.
+...........
+```
+
+After two steps, he could be at any of the tiles marked O above, including the starting position (either by going north-then-south or by going west-then-east).
+
+A single third step leads to even more possibilities:
+
+```
+...........
+.....###.#.
+.###.##..#.
+..#.#.O.#..
+...O#O#....
+.##.OS####.
+.##O.#...#.
+....O..##..
+.##.#.####.
+.##..##.##.
+...........
+```
+
+He will continue like this until his steps for the day have been exhausted. After a total of 6 steps, he could reach any of the garden plots marked O:
+
+```
+...........
+.....###.#.
+.###.##.O#.
+.O#O#O.O#..
+O.O.#.#.O..
+.##O.O####.
+.##.O#O..#.
+.O.O.O.##..
+.##.#.####.
+.##O.##.##.
+...........
+```
+
+In this example, if the Elf's goal was to get exactly 6 more steps today, he could use them to reach any of 16 garden plots.
+
+However, the Elf actually needs to get 64 steps today, and the map he's handed you is much larger than the example map.
+
+Starting from the garden plot marked S on your map, how many garden plots could the Elf reach in exactly 64 steps?
+
+</details>
+
+<details>
+<summary><b>Solution</b></summary>
+
+The solution to this is simply a BFS from the starting position, keeping track of the number of steps taken. Then, simply count the even steps since 64 is even and all reachable points on the grid walkable within $n$ steps must be of parity $n \mod 2$.
+
+</details>
+
+### Part 2
+
+<details open>
+<summary><b>Problem Statement</b></summary>
+
+The Elf seems confused by your answer until he realizes his mistake: he was reading from a list of his favorite numbers that are both perfect squares and perfect cubes, not his step counter.
+
+The actual number of steps he needs to get today is exactly 26501365.
+
+He also points out that the garden plots and rocks are set up so that the map repeats infinitely in every direction.
+
+So, if you were to look one additional map-width or map-height out from the edge of the example map above, you would find that it keeps repeating:
+
+```
+.................................
+.....###.#......###.#......###.#.
+.###.##..#..###.##..#..###.##..#.
+..#.#...#....#.#...#....#.#...#..
+....#.#........#.#........#.#....
+.##...####..##...####..##...####.
+.##..#...#..##..#...#..##..#...#.
+.......##.........##.........##..
+.##.#.####..##.#.####..##.#.####.
+.##..##.##..##..##.##..##..##.##.
+.................................
+.................................
+.....###.#......###.#......###.#.
+.###.##..#..###.##..#..###.##..#.
+..#.#...#....#.#...#....#.#...#..
+....#.#........#.#........#.#....
+.##...####..##..S####..##...####.
+.##..#...#..##..#...#..##..#...#.
+.......##.........##.........##..
+.##.#.####..##.#.####..##.#.####.
+.##..##.##..##..##.##..##..##.##.
+.................................
+.................................
+.....###.#......###.#......###.#.
+.###.##..#..###.##..#..###.##..#.
+..#.#...#....#.#...#....#.#...#..
+....#.#........#.#........#.#....
+.##...####..##...####..##...####.
+.##..#...#..##..#...#..##..#...#.
+.......##.........##.........##..
+.##.#.####..##.#.####..##.#.####.
+.##..##.##..##..##.##..##..##.##.
+.................................
+```
+
+This is just a tiny three-map-by-three-map slice of the inexplicably-infinite farm layout; garden plots and rocks repeat as far as you can see. The Elf still starts on the one middle tile marked S, though - every other repeated S is replaced with a normal garden plot (.).
+
+Here are the number of reachable garden plots in this new infinite version of the example map for different numbers of steps:
+
+- In exactly 6 steps, he can still reach 16 garden plots.
+- In exactly 10 steps, he can reach any of 50 garden plots.
+- In exactly 50 steps, he can reach 1594 garden plots.
+- In exactly 100 steps, he can reach 6536 garden plots.
+- In exactly 500 steps, he can reach 167004 garden plots.
+- In exactly 1000 steps, he can reach 668697 garden plots.
+- In exactly 5000 steps, he can reach 16733044 garden plots.
+
+However, the step count the Elf needs is much larger! Starting from the garden plot marked S on your infinite map, how many garden plots could the Elf reach in exactly 26501365 steps?
+
+</details>
+
+<details>
+<summary><b>Solution</b></summary>
+
+This solution is intractable with standard BFS. However, we can notice some special features of the input. First, the outer ring, the middle cross going through S, and a diamond are all garden plots. Second, the array is an exact square with the starting position in the center. Lastly, the number of steps is exactly enough for the Elf to walk outside the initial grid and an integer number of plots in addition to that.
+
+From this (and a lot of Reddit research), we can see that the reachable garden plots follows a quadratic form. Thus, we can simply calculate the first three integer plots (65 at 0 extra plots, 196 at 1, and 327 at 2). Then, we can use the quadratic formula to calculate the number of plots at 26501365 steps.
+
+Another method (more clearly derived by [u/YellowZorro](https://www.reddit.com/r/adventofcode/comments/18o4y0m/2023_day_21_part_2_algebraic_solution_using_only/)) derives a method to calculate the number of reachable plots using only the original BFS solution from part 1. The idea is to cache a small amount of searches and extrapolate the solution to a large diamond of searchable areas.
+
+</details>
+
