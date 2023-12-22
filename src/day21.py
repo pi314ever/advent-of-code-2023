@@ -131,51 +131,6 @@ def part_2_direct(grid: Grid, n_steps=26501365):
     search_distances = [65] * 4 + [131] * 4
 
 
-def quadratic(grid: Grid):
-    dc, dr = [1, 0, -1, 0], [0, 1, 0, -1]
-    start = grid.find(START)
-    R = set(grid.find_all(ROCK))
-    possible = {start}
-    points = {}
-    steps = 26501365
-    # Loop through all the steps
-    for s in range(1, steps):
-        new_possible = set()
-        first_pattern = [set() for _ in range(9)]
-        # Move from previously possible positions
-        for r, c in possible:
-            # Move to neighbors
-            for i in range(4):
-                rr, cc = r + dr[i], c + dc[i]
-                # Add if not a rock
-                if (rr % grid.N, cc % grid.M) not in R:
-                    new_possible.add((rr, cc))
-        # Set new possible positions
-        possible = new_possible
-        if s == 64:
-            print("part1", len(possible), "after 64 steps")
-            print("calculatin points")
-        # Save points if number of steps has the same remainder as the grid width
-        if s % grid.N == steps % grid.N:
-            points[s // grid.N] = len(possible)
-            print("point", len(points), len(possible), "after " + str(s) + " steps")
-        # Break after 3 points
-        if len(points) == 3:
-            break
-
-    # Quadratic extrapolation
-    def f(n):
-        y0 = points[0]
-        y1 = points[1]
-        y2 = points[2]
-        a = (y2 + y0 - 2 * y1) / 2
-        b = y1 - y0 - a
-        c = y0
-        return a * n**2 + b * n + c
-
-    print("part2", f(steps // grid.N))
-
-
 TEST = """...........
 .....###.#.
 .###.##..#.
