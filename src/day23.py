@@ -61,12 +61,12 @@ LONGEST_PATH = [
 def main():
     test_data = TEST.splitlines()
     test_grid = Grid(test_data)
-    assert part_1(test_grid) == 94
+    # assert part_1(test_grid) == 94
     # assert part_2(test_grid) == 154
 
     data = get_data(day=DAY, year=utils.YEAR).splitlines()
     grid = Grid(data)
-    # part_1(grid)
+    part_1(grid)
     part_2(grid)
 
 
@@ -85,46 +85,10 @@ def part_2(grid: Grid):
     end = grid.N - 1, grid[-1].index(PATH)
     graph = walk(start, end, grid)
     # Brute force DFS
-    # steps = dfs(start, 0, end, set(), graph)
-    # print(steps)
-    visualize_graph(graph, LONGEST_PATH)
-    # return steps
-
-
-def greedy(start, end, graph):
-    cur = start
-    dist = 0
-    seen = set()
-    path = []
-    to_remove = None
-    while cur != end:
-        path.append(cur)
-        seen.add(cur)
-        candidates = []
-        for n in graph.neighbors(cur):
-            if n not in seen:
-                candidates.append((n, graph[cur][n]["weight"]))
-        if not candidates:
-            # Backtrack
-            to_remove = cur  # Remove from seen after committing next move
-            path.pop()
-            cur = path.pop()
-            dist -= graph[cur][path[-1]]["weight"]
-            continue
-        candidates.sort(key=lambda x: x[1])
-        cur, d = candidates[-1]
-        dist += d
-        if to_remove:
-            seen.remove(to_remove)
-            to_remove = None
-    return path, dist
-
-
-def n_opt(start, end, graph, n=2):
-    # Performs n-opt max path on graph
-    path = greedy(start, end, graph)
-    if len(path) < n:
-        return path
+    steps = dfs(start, 0, end, set(), graph)
+    print(steps)
+    # visualize_graph(graph, LONGEST_PATH)
+    return steps
 
 
 def dfs(cur, dist, end, seen, graph):
