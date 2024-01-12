@@ -9,7 +9,7 @@ DAY = 25
 def main():
     test_data = TEST.splitlines()
     test_graph = parse(test_data)
-    # assert part_1(test_graph) == 54
+    assert part_1(test_graph) == 54
 
     data = get_data(day=DAY, year=utils.YEAR).splitlines()
     graph = parse(data)
@@ -17,13 +17,10 @@ def main():
 
 
 def part_1(graph: nx.Graph):
-    graph.remove_edge("gzr", "qnz")
-    graph.remove_edge("xgs", "lmj")
-    graph.remove_edge("pgz", "hgk")
-    components = nx.connected_components(graph)
-    components = list(components)
-    print(len(components[0]) * len(components[1]))
-    return
+    cuts, components = nx.stoer_wagner(graph)
+    ans = len(components[0]) * len(components[1])
+    print(ans)
+    return ans
 
 
 def visualize(graph: nx.Graph):
